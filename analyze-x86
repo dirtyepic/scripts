@@ -1,13 +1,15 @@
 #!/usr/bin/perl -w
 use strict;
 
-### Identify instruction sets used in a binary file. ###
+### Identify the instruction sets used in a binary file. ###
 
-# Tavis Ormandy <taviso@gentoo.org> 2003
-# Improvments by Will Woods <wwoods@gentoo.org>
-# Perl convertion by Georgi Georgiev <chutz@gg3.net>
-# Updated by Ryan Hill <dirtyepic.sk@gmail.com>
-# Updated by Ward Poelmans <wpoely86@gmail.com> 2009
+## Maintainer:  Ryan Hill (dirtyepic@gentoo.org)
+
+## Thanks to:
+# Tavis Ormandy (taviso@cmpxchg8b.com) (original author?)
+# Will Woods (wwoods@gentoo.org) (improvements)
+# Georgi Georgiev (chutz@gg3.net) (perl conversion)
+# Ward Poelmans (wpoely86@gmail.com) (opcode updates)
 
 # initialize everything to zero.
 my ($i486,$i586,$ppro,$mmx,$sse,$sse2,$sse3,$sse41,$sse42,$sse4a,$amd,$amd2,$cpuid) = (0,0,0,0,0,0,0,0,0,0,0,0);
@@ -83,9 +85,6 @@ else {
 }
 
 # do the disassembling.
-#
-# see binutils src include/opcode/* --de.
-
 open PIPE, "objdump -d $param | cut -f3 | cut -d' ' -f1 |" or die;
 my $print;
 while (defined (my $instruction = <PIPE>)) {
