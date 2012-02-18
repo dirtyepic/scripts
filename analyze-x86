@@ -13,76 +13,18 @@ use strict;
 
 # initialize everything to zero.
 my ($mmx,$sse,$sse2,$sse3,$sse41,$sse42,$sse4a,$amd,$amd2,$cpuid) = (0,0,0,0,0,0,0,0,0,0);
-my ($vendor, $subarch);
-
-# unfortunately there are mnemonic collisions between vendor sets
-# so check vendor_id string, and enable relevant sets.
-print "Checking vendor_id string... ";
 my $param = $ARGV[0];
-unless (defined $ARGV[1] and $ARGV[0] eq "--vendor") {
-	open FLAGS, "grep -Em1 '^flags' /proc/cpuinfo | " or die "could not read cpu flags in $!\n";
-	#while ( $flags 
-	my @flags=<FLAGS>;
-	close FLAGS;
-	
-	open PIPE, "grep -Em1 '^vendor_id.*: ' /proc/cpuinfo | cut -d' ' -f2 | " or die "could not read vendor_id";
-	$_ = <PIPE>;
-	close PIPE;
-
-	$param = $ARGV[0];
-	if (/GenuineIntel/)		{ $vendor="intel";		print "GenuineIntel\n" }
-	elsif (/AuthenticAMD/)	{ $vendor="amd"; }
-	elsif (/CyrixInstead/)	{ $vendor="cyrix";		print "CyrixInstead\n" }
-	elsif (/GenuineTMx86/)	{ $vendor="transmeta";	print "GenuineTMx86\n" }
-	else					{ $vendor="other";		print "other\n" }
-
-	if ($vendor eq "amd") {
-		foreach ( @flags ) {
-			if (/sse2/) { $vendor="amd64"; }
-		}
-	}
-	if ($vendor eq "amd64")		{ print "AuthenticAMD 64\n"; }
-	elsif ($vendor eq "amd")	{ print "AuthenticAMD\n"; }
-	}
-
-else {
-	($vendor) = $ARGV[1];
-	printf "%s\n", $vendor;
-	$param = $ARGV[2];
-}
 
 # quick sanity tests.
-defined $param	or die "usage: $0 [--vendor=intel|amd|amd64|cyrix|transmeta] /path/to/binary\n";
+defined $param	or die "Usage:  $0 /path/to/binary\n";
 -e $param or die "error: $param does not exist.\n";
 -r $param or die "error: cant read $param.\n";
 
 printf "Disassembling %s, please wait...\n", $param;
 
 # initialize screen output
-if ($vendor eq "intel") {
-	printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-		$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
-}
-elsif ($vendor eq "amd") {
-	printf "mmx: %4u sse: %4u 3dnow: %4u ext3dnow: %4u\r",
-		$mmx, $sse, $amd, $amd2;
-}
-elsif ($vendor eq "amd64") {
-	printf "mmx: %4u 3dnow: %4u ext3dnow: %4u sse: %4u sse2: %4u sse3: %4u sse4a: %4u\r",
-		$mmx, $amd, $amd2, $sse, $sse2, $sse3, $sse4a;
-}
-elsif ($vendor eq "cyrix") {
-	printf "mmx: %4u\r",
-		$mmx;
-}
-elsif ($vendor eq "transmeta") {
-	printf "mmx: %4u\r",
-		$mmx;
-}
-else {
-	printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-		$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
-}
+printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
+	$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
 
 # do the disassembling.
 open PIPE, "objdump -d $param | cut -f3 | cut -d' ' -f1 |" or die;
@@ -110,28 +52,11 @@ while (defined (my $instruction = <PIPE>)) {
 	# CpuID
 	elsif (grep /^$instruction$/, "cpuid") {$cpuid++; $print=1 }
 	
-	if ($print) {
-		if ($vendor eq "intel") {
-			printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-				$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
-		} elsif ($vendor eq "amd") {
-			printf "mmx: %4u sse: %4u 3dnow: %4u ext3dnow: %4u\r",
-				$mmx, $sse, $amd, $amd2;
-		} elsif ($vendor eq "amd64") {
-			printf "mmx: %4u 3dnow: %4u ext3dnow: %4u sse: %4u sse2: %4u sse3: %4u sse4a: %4u\r",
-				$mmx, $amd, $amd2, $sse, $sse2, $sse3, $sse4a;
-		} elsif ($vendor eq "cyrix") {
-			printf "mmx: %4u\r",
-				$mmx;
-		} elsif ($vendor eq "transmeta") {
-			printf "mmx: %4u\r",
-				$mmx;
-		} else {
-			printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-				$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
-		}
-		undef $print;
+if ($print) {
+	printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
+		$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
 	}
+undef $print;
 }
 
 # print a newline
@@ -144,56 +69,3 @@ if ($cpuid) {
 	printf "these instructions are not supported on the host.\n\n";
 }
 
-# print minimum required processor, if there are collissions
-# use the vendor to decide what to print.
-if ($sse42) {
-	if ($vendor eq "intel") {
-		$subarch="Intel Core i5/i7 (Nehalem) w/ SSE4.2"
-	}
- } elsif ($sse41) {
-	if ($vendor eq "intel") {
-		$subarch="Intel Core 2 Duo (Penryn) w/ SSE4.1"
-	}
- } elsif ($sse4a) {
-	if ($vendor eq "amd64") {
-		$subarch="AMD Phenom (Barcelona) w/ SSE4a"
-	}
- } elsif ($sse3) {
-	if ($vendor eq "intel") {
-		$subarch="Pentium IV (pentium4) w/ SSE3"
-	} elsif ($vendor eq "amd64") {
-		$subarch="AMD Athlon64 w/ SSE3"
-	}
-} elsif ($sse2) {
-	if ($vendor eq "intel") {
-		$subarch="Pentium IV (pentium4)"
-	} elsif ($vendor eq "amd64") {
-		$subarch="AMD Athlon64"
-	}
-} elsif ($sse) {
-	if ($vendor eq "intel") {
-		$subarch="Pentium III (pentium3)"
-	} elsif ($vendor eq "amd") {
-		$subarch="AMD Athlon 4 (athlon-4)"
-	} else {
-		$subarch="Pentium III (pentium3)"
-	}
-} elsif ($vendor eq "amd" and $amd2) {
-	$subarch="AMD Athlon (athlon)"
-} elsif ($vendor eq "amd" and $amd) {
-	$subarch="AMD K6 III (k6-3)"
-} elsif ($mmx) {
-	if ($vendor eq "intel") {
-		$subarch="Intel Pentium MMX [P55C] (pentium-mmx)"
-	} elsif ($vendor eq "amd") {
-		$subarch="AMD K6 (k6)"
-	} elsif ($vendor eq "cyrix") {
-		$subarch="Cyrix 6x86MX / MII (pentium-mmx)"
-	} else {
-		$subarch="Intel Pentium MMX [P55C] (pentium-mmx)"
-	}
-} else {
-	$subarch="i686 or compatible"
-}
-
-printf "%s will run on %s or higher processor.\n", $param, $subarch;
