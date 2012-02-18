@@ -12,7 +12,7 @@ use strict;
 # Ward Poelmans (wpoely86@gmail.com) (opcode updates)
 
 # initialize everything to zero.
-my ($mmx,$sse,$sse2,$sse3,$sse41,$sse42,$sse4a,$amd,$amd2,$cpuid) = (0,0,0,0,0,0,0,0,0,0);
+my ($mmx,$sse,$sse2,$sse3,$sse41,$sse42,$sse4a,$amd,$e3dn,$cpuid) = (0,0,0,0,0,0,0,0,0,0);
 my $param = $ARGV[0];
 
 # quick sanity tests.
@@ -20,44 +20,36 @@ defined $param	or die "Usage:  $0 /path/to/binary\n";
 -e $param or die "error: $param does not exist.\n";
 -r $param or die "error: cant read $param.\n";
 
-printf "Disassembling %s, please wait...\n", $param;
-
-# initialize screen output
-printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-	$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
+printf "Disassembling %s, please wait...\n\n", $param;
 
 # do the disassembling.
 open PIPE, "objdump -d $param | cut -f3 | cut -d' ' -f1 |" or die;
-my $print;
 while (defined (my $instruction = <PIPE>)) {
 	chomp $instruction; 
 	# MMX
-	if (grep /^$instruction$/, "emms","movd","movq","packssdw","packsswb","packuswb","paddb","paddd","paddsb","paddsw","paddusb","paddusw","paddw","pand","pandn","pcmpeqb","pcmpeqd","pcmpeqw","pcmpgtb","pcmpgtd","pcmpgtw","pmaddwd","pmulhw","pmullw","por","pslld","psllq","psllw","psrad","psraw","psrld","psrlq","psrlw","psubb","psubd","psubsb","psubsw","psubusb","psubusw","psubw","punpckhbw","punpckhdq","punpckhwd","punpcklbw","punpckldq","punpcklwd","pxor") { $mmx++; $print=1}
+	if (grep /^$instruction$/, "emms","movd","movq","packssdw","packsswb","packuswb","paddb","paddd","paddsb","paddsw","paddusb","paddusw","paddw","pand","pandn","pcmpeqb","pcmpeqd","pcmpeqw","pcmpgtb","pcmpgtd","pcmpgtw","pmaddwd","pmulhw","pmullw","por","pslld","psllq","psllw","psrad","psraw","psrld","psrlq","psrlw","psubb","psubd","psubsb","psubsw","psubusb","psubusw","psubw","punpckhbw","punpckhdq","punpckhwd","punpcklbw","punpckldq","punpcklwd","pxor") { $mmx++ }
 	# SSE
-	elsif (grep /^$instruction$/, "addps","addss","andnps","andps","cmpeqps","cmpeqss","cmpleps","cmpless","cmpltps","cmpltss","cmpneqps","cmpneqss","cmpnleps","cmpnless","cmpnltps","cmpnltss","cmpordps","cmpordss","cmpps","cmpss","cmpunordps","cmpunordss","comiss","cvtpi2ps","cvtps2pi","cvtsi2ss","cvtss2si","cvttps2pi","cvttss2si","divps","divss","ldmxcsr","maskmovq","maxps","maxss","minps","minss","movaps","movhlps","movhps","movlhps","movlps","movmskps","movntps","movntq","movss","movups","mulps","mulss","orps","pavgb","pavgw","pextrw","pinsrw","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","prefetchnta","prefetcht0","prefetcht1","prefetcht2","psadbw","pshufw","rcpps","rcpss","rsqrtps","rsqrtss","sfence","shufps","sqrtps","sqrtss","stmxcsr","subps","subss","ucomiss","unpckhps","unpcklps","xorps") { $sse++; $print=1 }
+	elsif (grep /^$instruction$/, "addps","addss","andnps","andps","cmpeqps","cmpeqss","cmpleps","cmpless","cmpltps","cmpltss","cmpneqps","cmpneqss","cmpnleps","cmpnless","cmpnltps","cmpnltss","cmpordps","cmpordss","cmpps","cmpss","cmpunordps","cmpunordss","comiss","cvtpi2ps","cvtps2pi","cvtsi2ss","cvtss2si","cvttps2pi","cvttss2si","divps","divss","ldmxcsr","maskmovq","maxps","maxss","minps","minss","movaps","movhlps","movhps","movlhps","movlps","movmskps","movntps","movntq","movss","movups","mulps","mulss","orps","pavgb","pavgw","pextrw","pinsrw","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","prefetchnta","prefetcht0","prefetcht1","prefetcht2","psadbw","pshufw","rcpps","rcpss","rsqrtps","rsqrtss","sfence","shufps","sqrtps","sqrtss","stmxcsr","subps","subss","ucomiss","unpckhps","unpcklps","xorps") { $sse++ }
 	# SSE2
-	elsif (grep /^$instruction$/, "addpd","addsd","andnpd","andpd","clflush","cmpeqpd","cmpeqsd","cmplepd","cmplesd","cmpltpd","cmpltsd","cmpneqpd","cmpneqsd","cmpnlepd","cmpnlesd","cmpnltpd","cmpnltsd","cmpordpd","cmpordsd","cmppd","cmpsd","cmpunordpd","cmpunordsd","comisd","cvtdq2pd","cvtdq2ps","cvtpd2dq","cvtpd2pi","cvtpd2ps","cvtpi2pd","cvtps2dq","cvtps2pd","cvtsd2si","cvtsd2ss","cvtsi2sd","cvtss2sd","cvttpd2dq","cvttpd2pi","cvttps2dq","cvttsd2si","divpd","divsd","lfence","maskmovdqu","maxpd","maxsd","mfence","minpd","minsd","movapd","movd","movdq2q","movdqa","movdqu","movhpd","movlpd","movmskpd","movntdq","movnti","movntpd","movq","movq2dq","movsd","movupd","mulpd","mulsd","orpd","packssdw","packsswb","packuswb","paddb","paddd","paddq","paddsb","paddsw","paddusb","paddusw","paddw","pand","pandn","pause","pavgb","pavgw","pcmpeqb","pcmpeqd","pcmpeqw","pcmpgtb","pcmpgtd","pcmpgtw","pextrw","pinsrw","pmaddwd","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","pmulhw","pmullw","pmuludq","por","psadbw","pshufd","pshufhw","pshuflw","pslld","pslldq","psllq","psllw","psrad","psraw","psrld","psrldq","psrlq","psrlw","psubb","psubd","psubq","psubsb","psubsw","psubusb","psubusw","psubw","punpckhbw","punpckhdq","punpckhqdq","punpckhwd","punpcklbw","punpckldq") { $sse2++; $print=1 }
+	elsif (grep /^$instruction$/, "addpd","addsd","andnpd","andpd","clflush","cmpeqpd","cmpeqsd","cmplepd","cmplesd","cmpltpd","cmpltsd","cmpneqpd","cmpneqsd","cmpnlepd","cmpnlesd","cmpnltpd","cmpnltsd","cmpordpd","cmpordsd","cmppd","cmpsd","cmpunordpd","cmpunordsd","comisd","cvtdq2pd","cvtdq2ps","cvtpd2dq","cvtpd2pi","cvtpd2ps","cvtpi2pd","cvtps2dq","cvtps2pd","cvtsd2si","cvtsd2ss","cvtsi2sd","cvtss2sd","cvttpd2dq","cvttpd2pi","cvttps2dq","cvttsd2si","divpd","divsd","lfence","maskmovdqu","maxpd","maxsd","mfence","minpd","minsd","movapd","movd","movdq2q","movdqa","movdqu","movhpd","movlpd","movmskpd","movntdq","movnti","movntpd","movq","movq2dq","movsd","movupd","mulpd","mulsd","orpd","packssdw","packsswb","packuswb","paddb","paddd","paddq","paddsb","paddsw","paddusb","paddusw","paddw","pand","pandn","pause","pavgb","pavgw","pcmpeqb","pcmpeqd","pcmpeqw","pcmpgtb","pcmpgtd","pcmpgtw","pextrw","pinsrw","pmaddwd","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","pmulhw","pmullw","pmuludq","por","psadbw","pshufd","pshufhw","pshuflw","pslld","pslldq","psllq","psllw","psrad","psraw","psrld","psrldq","psrlq","psrlw","psubb","psubd","psubq","psubsb","psubsw","psubusb","psubusw","psubw","punpckhbw","punpckhdq","punpckhqdq","punpckhwd","punpcklbw","punpckldq") { $sse2++ }
 	# 3DNow
-	elsif (grep /^$instruction$/, "pavgusb","pfadd","pfsub","pfsubr","pfacc","pfcmpge","pfcmpgt","pfcmpeq","pfmin","pfmax","pi2fw","pi2fd","pf2iw","pf2id","pfrcp","pfrsqrt","pfmul","pfrcpit1","pfrsqit1","pfrcpit2","pmulhrw","pswapw","femms","prefetch") { $amd++; $print=1 }
+	elsif (grep /^$instruction$/, "pavgusb","pfadd","pfsub","pfsubr","pfacc","pfcmpge","pfcmpgt","pfcmpeq","pfmin","pfmax","pi2fw","pi2fd","pf2iw","pf2id","pfrcp","pfrsqrt","pfmul","pfrcpit1","pfrsqit1","pfrcpit2","pmulhrw","pswapw","femms","prefetch") { $amd++ }
 	# Ext3DNow
-	elsif (grep /^$instruction$/, "pf2iw","pfnacc","pfpnacc","pi2fw","pswapd","maskmovq","movntq","pavgb","pavgw","pextrw","pinsrw","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","prefetchnta","prefetcht0","prefetcht1","prefetcht2","psadbw","pshufw","sfence") { $amd2++; $print=1 }
+	elsif (grep /^$instruction$/, "pf2iw","pfnacc","pfpnacc","pi2fw","pswapd","maskmovq","movntq","pavgb","pavgw","pextrw","pinsrw","pmaxsw","pmaxub","pminsw","pminub","pmovmskb","pmulhuw","prefetchnta","prefetcht0","prefetcht1","prefetcht2","psadbw","pshufw","sfence") { $e3dn++ }
 	# SSE3
-	elsif (grep /^$instruction$/, "addsubpd","addsubps","fisttp","fisttpl","fisttpll","haddpd","haddps","hsubpd","hsubps","lddqu","monitor","movddup","movshdup","movsldup","mwait") { $sse3++; $print=1 }
+	elsif (grep /^$instruction$/, "addsubpd","addsubps","fisttp","fisttpl","fisttpll","haddpd","haddps","hsubpd","hsubps","lddqu","monitor","movddup","movshdup","movsldup","mwait") { $sse3++ }
 	# SSE4.1
-	elsif (grep /^$instruction$/, "mpsadbw", "phminposuw", "pmuldq", "pmulld", "dpps", "dppd", "blendps", "blendpd", "blendvps", "blendvpd", "pblendvb", "pblendw", "pminsb", "pmaxsb", "pminuw", "pmaxuw", "pminud", "pmaxud", "pminsd", "pmaxsd", "roundps", "roundss", "roundpd", "roundsd", "insertps", "pinsrb", "pinsrd", "pinsrq", "extractps", "pextrb", "pextrw", "pextrd", "pextrq", "pmovsxbw", "pmovzxbw", "pmovsxbd", "pmovzxbd", "pmovsxbq", "pmovzxbq", "pmovsxwd", "pmovzxwd", "pmovsxwq", "pmovzxwq", "pmovsxdq", "pmovzxdq", "movntdqa", "packusdw", "pcmpeqq", "ptest") { $sse41++; $print=1 }
+	elsif (grep /^$instruction$/, "mpsadbw", "phminposuw", "pmuldq", "pmulld", "dpps", "dppd", "blendps", "blendpd", "blendvps", "blendvpd", "pblendvb", "pblendw", "pminsb", "pmaxsb", "pminuw", "pmaxuw", "pminud", "pmaxud", "pminsd", "pmaxsd", "roundps", "roundss", "roundpd", "roundsd", "insertps", "pinsrb", "pinsrd", "pinsrq", "extractps", "pextrb", "pextrw", "pextrd", "pextrq", "pmovsxbw", "pmovzxbw", "pmovsxbd", "pmovzxbd", "pmovsxbq", "pmovzxbq", "pmovsxwd", "pmovzxwd", "pmovsxwq", "pmovzxwq", "pmovsxdq", "pmovzxdq", "movntdqa", "packusdw", "pcmpeqq", "ptest") { $sse41++ }
 	# SSE4.2
-	elsif (grep /^$instruction$/, "crc32", "pcmpestri", "pcmpestrm", "pcmpistri", "pcmpistrm", "pcmpgtq", "popcnt") { $sse42++; $print=1 }
+	elsif (grep /^$instruction$/, "crc32", "pcmpestri", "pcmpestrm", "pcmpistri", "pcmpistrm", "pcmpgtq", "popcnt") { $sse42++ }
 	# SSE4a
-	elsif (grep /^$instruction$/, "lzcnt", "popcnt", "extrq", "insertq", "movntsd" ,"movntss") { $sse4a++; $print=1 }
+	elsif (grep /^$instruction$/, "lzcnt", "popcnt", "extrq", "insertq", "movntsd" ,"movntss") { $sse4a++ }
 	# CpuID
-	elsif (grep /^$instruction$/, "cpuid") {$cpuid++; $print=1 }
-	
-if ($print) {
-	printf "mmx: %4u sse: %4u sse2: %4u sse3: %4u sse4.1: %4u sse4.2: %4u\r",
-		$mmx, $sse, $sse2, $sse3, $sse41, $sse42;
-	}
-undef $print;
+	elsif (grep /^$instruction$/, "cpuid") {$cpuid++ }
 }
+
+printf "\tMMX: %13u\n\tSSE: %13u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n",
+	$mmx, $sse, $e3dn, $sse2, $sse3, $sse4a, $sse41, $sse42;
 
 # print a newline
 print "\n";
