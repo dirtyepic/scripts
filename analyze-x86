@@ -4,6 +4,7 @@ use strict;
 ### Identify the instruction sets used in a binary file. ###
 
 ## Maintainer:  Ryan Hill (dirtyepic@gentoo.org)
+#  https://github.com/dirtyepic/scripts/blob/master/analyze-x86
 
 ## Thanks to:
 # Tavis Ormandy (taviso@cmpxchg8b.com) (original author?)
