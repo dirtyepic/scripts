@@ -2,6 +2,8 @@
 #
 # kernel cleaner
 # (dirtyepic@gentoo.org)
+#
+# https://github.com/dirtyepic/scripts/blob/master/kernelclean
 
 . /etc/init.d/functions.sh
 
@@ -50,7 +52,7 @@ if [[ $(qlist -I ${pkgname}) ]]; then
 		exit 1
 	fi
 else
-	ewarn "Package ${pkgname} not installed, skipping unmerge"
+	ewarn "Package ${pkgname} not installed, skipping unmerge."
 fi
 
 # remove leftovers
@@ -59,17 +61,17 @@ if [[ -d /usr/src/${srcdir} ]]; then
 	einfo "Purging source directory /usr/src/${srcdir}..."
 	rm -rf "/usr/src/${srcdir}"
 	if [[ $? != "0" ]]; then
-		eerror "Purging source failed"
+		eerror "Purging source failed."
 		exit 1
 	fi
 fi
 
 # Did we break /usr/src/linux
 if [[ $(find -L /usr/src -name linux -type l) ]]; then
-	einfo "Kernel symlink is broken.  Removing..."
+	einfo "Kernel symlink is broken.  Removing."
 	rm /usr/src/linux
 	if [[ $? != "0" ]]; then
-		eerror "Symlink removal failed"
+		eerror "Symlink removal failed."
 		exit 1
 	fi
 	SYMWARN="true"
@@ -77,29 +79,36 @@ fi
 
 # remove modules
 if [[ -d /lib/modules/${kername} ]]; then 
-	einfo "Purging /lib/modules/${kername}..."
+	einfo "Purging /lib/modules/${kername}."
 	rm -rf "/lib/modules/${kername}"
 	if [[ $? != "0" ]]; then
-		eerror "Purging modules failed"
+		eerror "Purging modules failed."
 		exit 1
 	fi
 else
-	ewarn "No modules found in /lib/modules/${kername}"
+	ewarn "No modules found in /lib/modules/${kername}."
 fi
 
 # remove /boot stuff
 for x in System.map config kernel; do
 	if [[ -e /boot/${x}-${kername} ]]; then
-		einfo "Removing /boot/${x}-${kername}..."
+		einfo "Removing /boot/${x}-${kername}."
 		rm -f "/boot/${x}-${kername}"
 		if [[ $? != "0" ]]; then
-			eerror "Removing /boot files failed"
+			eerror "Removing /boot files failed."
 			exit 1
 		fi
 	else
-		einfo "${x}-${kername} not found"
+		einfo "${x}-${kername} not found."
 	fi
 done
+
+if [[ -e /boot/initrd-${kername}.cpio.gz ]]; then
+	einfo "Removing /boot/initrd-${kername}.cpio.gz."
+	rm -f "/boot/initrd-${kername}.cpio.gz"
+else
+	einfo "initrd-${kername}.cpio.gz not found."
+fi
 
 echo
 einfo "This script is currently too dumb to remove grub menu entries."

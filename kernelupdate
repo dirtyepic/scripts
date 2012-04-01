@@ -2,6 +2,8 @@
 #
 # kernel updater
 # (dirtyepic@gentoo.org)
+#
+# https://github.com/dirtyepic/scripts/blob/master/kernelupdate
 
 . /etc/init.d/functions.sh
 
@@ -98,6 +100,14 @@ fi
 einfo "Building kernel ${kname} (-j${JOBS:-16})"
 make -j${JOBS:-16} ${VERBOSE}
 [[ $? != 0 ]] && exit 1
+
+einfo "Building initramfs tools"
+make -C /usr/src/linux/usr/ gen_init_cpio
+[[ $? != 0 ]] && exit 1
+
+chmod +x /usr/src/linux/usr/gen_init_cpio \
+	/usr/src/linux/scripts/gen_initramfs_list.sh
+
 einfo "Installing modules"
 make modules_install
 [[ $? != 0 ]] && exit 1
@@ -110,6 +120,12 @@ cp /usr/src/linux/System.map /boot/System.map-"${kname}"
 cp /usr/src/linux/.config /boot/config-"${kname}"
 [[ $? != 0 ]] && exit 1
 
+einfo "Generating initramfs"
+/usr/src/linux/scripts/gen_initramfs_list.sh -o /boot/initrd-"${kname}".cpio.gz \
+	/usr/src/initramfs/initramfs_list
+[[ $? != 0 ]] && exit 1
+
+
 if [[ ! $(grep "kernel-${kname}" /boot/grub/grub.conf) ]]; then
 	einfo "Installing grub.conf entry for ${kname}"
 	i=$(grep "root (hd0,0)" /boot/grub/grub.conf | wc -l)
@@ -119,6 +135,7 @@ if [[ ! $(grep "kernel-${kname}" /boot/grub/grub.conf) ]]; then
 		title ${kname}
 		root (hd0,0)
 		kernel /boot/kernel-${kname} root=/dev/sda3
+		initrd /boot/initrd-${kname}.cpio.gz
 	EOF
 
 	if [[ ${DEFAULT} == false ]]; then
