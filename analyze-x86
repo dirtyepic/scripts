@@ -13,6 +13,7 @@ use warnings;
 # Will Woods (wwoods@gentoo.org) (improvements)
 # Georgi Georgiev (chutz@gg3.net) (perl conversion)
 # Ward Poelmans (wpoely86@gmail.com) (opcode updates)
+# Denis Sokolovsky (massive performance improvements and cleanup)
 
 # initialize everything to zero.
 my %found = map { $_ => 0 } qw(mmx sse sse2 sse3 ssse3 sse41 sse42 sse4a e3dn avx fma fma4 cpuid);
