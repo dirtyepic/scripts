@@ -16,7 +16,7 @@ use warnings;
 # Denis Sokolovsky (ganellon@gmail.com) (massive performance improvements and cleanup)
 
 # initialize everything to zero.
-my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a avx fma fma4 cpuid);
+my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a aes avx fma fma4 cpuid);
 my %set = (
     (map { $_ =>   'mmx' } qw(
         emms movd movq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn
@@ -48,6 +48,7 @@ my %set = (
     )),
     (map { $_ => 'sse42' } qw(crc32 pcmpestri pcmpestrm pcmpgtq pcmpistri pcmpistrm popcnt)),
     (map { $_ => 'sse4a' } qw(extrq insertq movntsd movntss)),
+    (map { $_ =>   'aes' } qw(aesenc aesenclast aesdec aesdeclast aesimc aeskeygenassist)),
     (map { $_ =>   'avx' } qw(
         pclmulhqhqdq pclmulhqlqdq pclmullqhqdq pclmullqlqdq pclmulqdq vaddpd vaddps vaddsd vaddss vaddsubpd vaddsubps vaesdec vaesdeclast vaesenc vaesenclast vaesimc vaeskeygenassist vandnpd vandnps
         vandpd vandps vblendpd vblendps vblendvpd vblendvps vbroadcastf128 vbroadcastsd vbroadcastss vcmpeq_ospd vcmpeq_osps vcmpeq_ossd vcmpeq_osss vcmpeqpd vcmpeqps vcmpeqsd vcmpeqss vcmpeq_uqpd
@@ -112,8 +113,8 @@ while (<$pipe>) {
     }
 }
 
-printf "\tMMX: %13u\n\tSSE: %13u\n\tMMXExt: %10u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAVX: %13u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
-    @found{qw/mmx sse mmxext e3dn sse2 sse3 ssse3 sse4a sse41 sse42 avx fma fma4/};
+printf "\tMMX: %13u\n\tSSE: %13u\n\tMMXExt: %10u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAES: %13u\n\tAVX: %13u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
+    @found{qw/mmx sse mmxext e3dn sse2 sse3 ssse3 sse4a sse41 sse42 aes avx fma fma4/};
 
 if ($found{cpuid}) {
     printf "\nThis binary was found to contain the cpuid instruction.\n";
