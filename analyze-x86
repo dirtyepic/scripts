@@ -19,9 +19,10 @@ use warnings;
 my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a avx fma fma4 cpuid);
 my %set = (
     (map { $_ =>   'mmx' } qw(
-        emms movq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn pavgusb pcmpeqb pcmpeqd pcmpeqw pcmpgtb pcmpgtd pcmpgtw
-        pmaddwd pmulhw pmullw por pslld psllq psllw psrad psraw psrld psrlq psrlw psubb psubd psubsb psubsw psubusb psubusw psubw
-        punpckhbw punpckhdq punpckhwd punpcklbw punpckldq punpcklwd pxor
+        emms movd movq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn
+        pcmpeqb pcmpeqd pcmpeqw pcmpgtb pcmpgtd pcmpgtw pmaddwd pmulhw pmullw por pslld psllq psllw psrad
+        psraw psrld psrlq psrlw psubb psubd psubsb psubsw psubusb psubusw psubw punpckhbw punpckhdq punpckhwd
+        punpcklbw punpckldq punpcklwd pxor
     )),
     (map { $_ =>   'sse' } qw(
         addps addss andnps andps cmpeqps cmpeqss cmpleps cmpless cmpltps cmpltss cmpneqps cmpneqss cmpnleps cmpnless cmpnltps cmpnltss cmpordps cmpordss cmpps cmpss cmpunordps cmpunordss comiss
@@ -36,7 +37,7 @@ my %set = (
         addpd addsd andnpd andpd clflush cmpeqpd cmpeqsd cmplepd cmplesd cmpltpd cmpltsd cmpneqpd cmpneqsd cmpnlepd cmpnlesd cmpnltpd cmpnltsd cmpordpd cmpordsd cmppd cmpunordpd cmpunordsd comisd
         cvtdq2pd cvtdq2ps cvtpd2dq cvtpd2pi cvtpd2ps cvtpi2pd cvtps2dq cvtps2pd cvtsd2si cvtsd2ss cvtsi2sd cvtss2sd cvttpd2dq cvttpd2pi cvttps2dq cvttsd2si divpd divsd maskmovdqu maxpd maxsd minpd
         minsd movapd movdq2q movdqa movdqu movhpd movlpd movmskpd movntdq movnti movntpd movq2dq movupd mulpd mulsd orpd paddq pmuludq pshufd pshufhw pshuflw pslldq psrldq psubq punpckhqdq punpcklqdq
-        shufpd sqrtpd sqrtsd subpd subsd ucomisd unpckhpd unpcklpd xorpd movd
+        shufpd sqrtpd sqrtsd subpd subsd ucomisd unpckhpd unpcklpd xorpd
     )),
     (map { $_ =>  'sse3' } qw(addsubpd addsubps fisttp haddpd haddps hsubpd hsubps lddqu monitor movddup movshdup movsldup mwait)),
     (map { $_ => 'ssse3' } qw(pabsb pabsd pabsw palignr phaddd phaddsw phaddw phsubd phsubsw phsubw pmaddubsw pmulhrsw pshufb psignb psignd psignw)),
