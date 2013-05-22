@@ -16,17 +16,20 @@ use warnings;
 # Denis Sokolovsky (ganellon@gmail.com) (massive performance improvements and cleanup)
 
 # initialize everything to zero.
-my %found = map { $_ => 0 } qw(mmx sse sse2 sse3 ssse3 sse41 sse42 sse4a e3dn avx fma fma4 cpuid);
+my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a avx fma fma4 cpuid);
 my %set = (
     (map { $_ =>   'mmx' } qw(
-        emms maskmovq movq movntq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn pavgusb pavgb pavgw pcmpeqb pcmpeqd pcmpeqw pcmpgtb pcmpgtd pcmpgtw pextrw
-        pinsrw pmaddwd pmaxsw pmaxub pminsw pminub pmovmskb pmulhw pmullw pmulhuw por psadbw pshufw pslld psllq psllw psrad psraw psrld psrlq psrlw psubb psubd psubsb psubsw psubusb psubusw psubw
+        emms movq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn pavgusb pcmpeqb pcmpeqd pcmpeqw pcmpgtb pcmpgtd pcmpgtw
+        pmaddwd pmulhw pmullw por pslld psllq psllw psrad psraw psrld psrlq psrlw psubb psubd psubsb psubsw psubusb psubusw psubw
         punpckhbw punpckhdq punpckhwd punpcklbw punpckldq punpcklwd pxor
     )),
     (map { $_ =>   'sse' } qw(
         addps addss andnps andps cmpeqps cmpeqss cmpleps cmpless cmpltps cmpltss cmpneqps cmpneqss cmpnleps cmpnless cmpnltps cmpnltss cmpordps cmpordss cmpps cmpss cmpunordps cmpunordss comiss
         cvtpi2ps cvtps2pi cvtsi2ss cvtss2si cvttps2pi cvttss2si divps divss ldmxcsr maxps maxss minps minss movaps movhlps movhps movlhps movlps movmskps movntps movss movups mulps mulss orps rcpps
         rcpss rsqrtps rsqrtss shufps sqrtps sqrtss stmxcsr subps subss ucomiss unpckhps unpcklps xorps
+    )),
+    (map { $_ =>   'mmxext' } qw(
+        maskmovq movntq pavgb pavgw pextrw pinsrw pmaxsw pmaxub pminsw pminub pmovmskb pmulhuw psadbw pshufw
     )),
     (map { $_ =>  'e3dn' } qw(pf2iw pfnacc pfpnacc pi2fw pswapd)),
     (map { $_ =>  'sse2' } qw(
@@ -108,8 +111,8 @@ while (<$pipe>) {
     }
 }
 
-printf "\tMMX: %13u\n\tSSE: %13u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAVX: %13u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
-    @found{qw/mmx sse e3dn sse2 sse3 ssse3 sse4a sse41 sse42 avx fma fma4/};
+printf "\tMMX: %13u\n\tSSE: %13u\n\tMMXExt: %10u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAVX: %13u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
+    @found{qw/mmx sse mmxext e3dn sse2 sse3 ssse3 sse4a sse41 sse42 avx fma fma4/};
 
 if ($found{cpuid}) {
     printf "\nThis binary was found to contain the cpuid instruction.\n";
