@@ -16,7 +16,7 @@ use warnings;
 # Denis Sokolovsky (ganellon@gmail.com) (massive performance improvements and cleanup)
 
 # initialize everything to zero.
-my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a aes avx fma fma4 cpuid);
+my %found = map { $_ => 0 } qw(mmx sse mmxext e3dn sse2 sse3 ssse3 sse41 sse42 sse4a aes avx avx2 fma fma4 cpuid);
 my %set = (
     (map { $_ =>   'mmx' } qw(
         emms movd movq packssdw packsswb packuswb paddb paddd paddsb paddsw paddusb paddusw paddw pand pandn
@@ -76,6 +76,8 @@ my %set = (
         vroundsd vroundss vrsqrtps vrsqrtss vshufpd vshufps vsqrtpd vsqrtps vsqrtsd vsqrtss vstmxcsr vsubpd vsubps vsubsd vsubss vtestpd vtestps vucomisd vucomiss vunpckhpd vunpckhps vunpcklpd
         vunpcklps vxorpd vxorps vzeroall vzeroupper
     )),
+    (map { $_ =>   'avx2' } qw(vbroadcasti128 vbroadcastsd vbroadcastss vextracti128 vgatherdpd vgatherdps vgatherqpd vgatherqps vinserti128 vpblendd vpbroadcastb vpbroadcastd vpbroadcastq vpbroadcastw 
+        vperm2i128 vpermd vpermpd vpermps vpermq vpgatherdd vpgatherdq vpgatherqd vpgatherqq vpmaskmovd vpmaskmovq vpsllvd vpsllvq vpsravd vpsrlvd vpsrlvq)),
     (map { $_ =>   'fma' } qw(
         vfmadd123pd vfmadd123ps vfmadd123sd vfmadd123ss vfmadd132pd vfmadd132ps vfmadd132sd vfmadd132ss vfmadd213pd vfmadd213ps vfmadd213sd vfmadd213ss vfmadd231pd vfmadd231ps vfmadd231sd vfmadd231ss
         vfmadd312pd vfmadd312ps vfmadd312sd vfmadd312ss vfmadd321pd vfmadd321ps vfmadd321sd vfmadd321ss vfmaddsub123pd vfmaddsub123ps vfmaddsub132pd vfmaddsub132ps vfmaddsub213pd vfmaddsub213ps
@@ -113,8 +115,8 @@ while (<$pipe>) {
     }
 }
 
-printf "\tMMX: %13u\n\tSSE: %13u\n\tMMXExt: %10u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAES: %13u\n\tAVX: %13u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
-    @found{qw/mmx sse mmxext e3dn sse2 sse3 ssse3 sse4a sse41 sse42 aes avx fma fma4/};
+printf "\tMMX: %13u\n\tSSE: %13u\n\tMMXExt: %10u\n\tEnh 3DNow: %7u\n\tSSE2: %12u\n\tSSE3: %12u\n\tSSSE3: %11u\n\tSSE4A: %11u\n\tSSE4.1: %10u\n\tSSE4.2: %10u\n\tAES: %13u\n\tAVX: %13u\n\tAVX2: %12u\n\tFMA: %13u\n\tFMA4: %12u\n\n",
+    @found{qw/mmx sse mmxext e3dn sse2 sse3 ssse3 sse4a sse41 sse42 aes avx avx2 fma fma4/};
 
 if ($found{cpuid}) {
     printf "\nThis binary was found to contain the cpuid instruction.\n";
